@@ -308,11 +308,14 @@ body[data-view] .view { animation: view-in 360ms var(--ease) both; }
   counter-reset: step;
 }
 
+/* Block layout with an absolutely-positioned badge. Using a grid here split
+   each step's <strong> and its trailing text into separate grid items, wrapping
+   the text into the 28px number column (one word per line). Block flow keeps
+   the inline <strong> + text together and wrapping across the full width. */
 .story-steps li {
-  display: grid;
-  grid-template-columns: 28px 1fr;
-  gap: 12px;
-  align-items: start;
+  position: relative;
+  padding-left: 40px;
+  min-height: 24px;
   color: var(--muted);
   line-height: 1.5;
   counter-increment: step;
@@ -320,11 +323,13 @@ body[data-view] .view { animation: view-in 360ms var(--ease) both; }
 
 .story-steps li::before {
   content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0;
   display: grid;
   place-items: center;
   width: 24px;
   height: 24px;
-  margin-top: 1px;
   border-radius: 50%;
   background: var(--accent-soft);
   color: var(--accent);
