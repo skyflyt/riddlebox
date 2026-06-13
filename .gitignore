@@ -1,0 +1,37 @@
+# macOS / Windows
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (not used, but defensive in case anyone adds tooling later)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build artifacts
+dist/
+build/
+.cache/
+
+# === No secrets, ever. ===
+# This is a static frontend. It must not contain or reference secrets.
+# If you find yourself wanting to commit any of the following, the design is wrong.
+.env
+.env.*
+secrets
+secrets.*
+secrets/
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+credentials*
+*.local
