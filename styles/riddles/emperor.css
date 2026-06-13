@@ -200,11 +200,83 @@ body[data-theme="emperor"] {
   text-transform: uppercase;
 }
 
-.tray-count { font-size: 0.92rem; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+.tray-caption {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
 
-.tray-basin {
+/* Two colour piles in the hand — each is its own pourable bucket. */
+.tray-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  border-radius: 14px;
+  transition: box-shadow 160ms var(--ease);
+}
+
+.tray-row.drop-active {
+  box-shadow: 0 0 0 2px rgba(244, 195, 91, 0.5), 0 0 28px rgba(244, 195, 91, 0.22);
+}
+
+.tray-pile {
+  display: grid;
+  gap: 8px;
+  transition: opacity 180ms var(--ease);
+}
+
+.tray-pile.dim { opacity: 0.42; }
+.tray-pile.depleted { opacity: 0.32; }
+
+.pile-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 160ms var(--ease), background 160ms var(--ease), color 160ms var(--ease), box-shadow 160ms var(--ease);
+}
+
+.pile-chip:hover:not(:disabled) { border-color: var(--border-strong); }
+.pile-chip:disabled { cursor: not-allowed; }
+
+.pile-chip.armed {
+  border-color: var(--accent);
+  color: var(--text);
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 1px rgba(244, 195, 91, 0.4), 0 6px 18px rgba(244, 195, 91, 0.12);
+}
+
+.chip-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+.chip-dot.white { background: radial-gradient(circle at 32% 26%, #fff, #fff5d6 38%, #d4c9b0 78%); border: 1px solid rgba(80, 65, 40, 0.5); }
+.chip-dot.black { background: radial-gradient(circle at 32% 24%, #6b6470, #1a1820 38%, #050507 80%); border: 1px solid rgba(255, 255, 255, 0.16); }
+
+.chip-label { letter-spacing: 0.01em; }
+.chip-count {
+  margin-left: auto;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8rem;
+}
+
+.pile-basin {
   position: relative;
-  height: 132px;
+  height: 116px;
   border-radius: 14px;
   border: 1px dashed var(--border-strong);
   background:
@@ -213,8 +285,9 @@ body[data-theme="emperor"] {
   box-shadow: inset 0 -14px 24px rgba(0, 0, 0, 0.28);
   overflow: hidden;
   touch-action: none;
-  transition: border-color 160ms var(--ease), box-shadow 160ms var(--ease), background 160ms var(--ease);
 }
+
+.tray-pile.white .pile-basin { box-shadow: inset 0 -14px 24px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(244, 195, 91, 0.05); }
 
 /* ── Marbles ── */
 .marbles {
@@ -222,7 +295,7 @@ body[data-theme="emperor"] {
   inset: 14px 10px 10px;
 }
 
-.tray-basin .marbles { inset: 10px 12px 8px; }
+.pile-basin .marbles { inset: 8px 10px 6px; }
 
 .marble {
   position: absolute;
@@ -349,7 +422,8 @@ body[data-theme="emperor"] {
 
 @media (max-width: 520px) {
   .jar-glass { height: 200px; }
-  .tray-basin { height: 116px; }
+  .pile-basin { height: 104px; }
+  .pile-chip { padding: 7px 10px; font-size: 0.82rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

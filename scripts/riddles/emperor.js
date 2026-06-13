@@ -100,14 +100,23 @@ export function mount(root, { fx }) {
   const jB = jarCard("B");
   const jars = el("div", { class: "jars" }, [jA.card, jB.card]);
 
+  function pileCard(color, label) {
+    return el("div", { class: `tray-pile ${color}`, "data-pile": color }, [
+      el("button", { class: "pile-chip armed", type: "button", "data-arm": color, "aria-pressed": "true" }, [
+        el("span", { class: `chip-dot ${color}`, "aria-hidden": "true" }),
+        el("span", { class: "chip-label", text: label }),
+        el("span", { class: "chip-count", "data-pile-count": color, text: "50" })
+      ]),
+      el("div", { class: "pile-basin" }, [el("div", { class: "marbles", "data-marbles": color === "white" ? "trayW" : "trayB" })])
+    ]);
+  }
+  const trayRow = el("div", { class: "tray-row", "data-basin": "tray" }, [pileCard("white", "White"), pileCard("black", "Black")]);
   const tray = el("div", { class: "tray-card" }, [
     el("div", { class: "tray-head" }, [
       el("span", { class: "tray-title", text: "Marbles in hand" }),
-      el("span", { class: "tray-count", "data-tray-count": "1", text: "100 in hand · 50w / 50b" })
+      el("span", { class: "tray-caption", "data-tray-caption": "1", text: "Tap a pile to choose what pours · hold a jar to pour" })
     ]),
-    el("div", { class: "tray-basin", "data-basin": "tray" }, [
-      el("div", { class: "marbles", "data-marbles": "tray" })
-    ])
+    trayRow
   ]);
 
   const verdict = el("div", { class: "verdict", text: "Drag marbles into both jars — or hold over a jar to pour. Then let the emperor draw." });
@@ -119,8 +128,8 @@ export function mount(root, { fx }) {
   const story = el("section", { class: "panel" }, [
     el("h2", { class: "panel-title", text: "How to play" }),
     el("ol", { class: "story-steps" }, [
-      el("li", { html: "<strong>Drag marbles</strong> from your hand into either jar. Drag between jars to rebalance. Both jars take any colour." }),
-      el("li", { html: "<strong>Hold over a jar to pour</strong> a stream from your hand. <strong>Tap a marble in a jar</strong> to drop it back." }),
+      el("li", { html: "<strong>Drag marbles</strong> from either pile into a jar. Drag between jars to rebalance. Both jars take any colour." }),
+      el("li", { html: "<strong>Hold over a jar to pour</strong> a stream. <strong>Tap the White or Black pile</strong> to pour just that colour — or leave both lit to pour a mix. <strong>Tap a marble in a jar</strong> to drop it back." }),
       el("li", { html: "<strong>Place all 100</strong> with neither jar empty, then the emperor picks a jar and pulls one marble. White means freedom." })
     ])
   ]);
@@ -171,12 +180,16 @@ export function mount(root, { fx }) {
   root.append(head, grid, solution);
 
   // ─── Refs ───
+  // The hand is two colour piles; jar contents are single layers.
   const layers = {
-    tray: tray.querySelector('[data-marbles="tray"]'),
+    trayW: tray.querySelector('[data-marbles="trayW"]'),
+    trayB: tray.querySelector('[data-marbles="trayB"]'),
     A: jA.glass.querySelector('[data-marbles="A"]'),
     B: jB.glass.querySelector('[data-marbles="B"]')
   };
-  const dropTargets = { tray: tray.querySelector('[data-basin="tray"]'), A: jA.glass, B: jB.glass };
+  const dropTargets = { tray: trayRow, A: jA.glass, B: jB.glass };
+  const armed = { white: true, black: true };
+  let pourTurn = 0;
   const refs = {
     countA: court.querySelector('[data-jar-count="A"]'),
     countB: court.querySelector('[data-jar-count="B"]'),
@@ -184,7 +197,13 @@ export function mount(root, { fx }) {
     oddsB: court.querySelector('[data-jar-odds="B"]'),
     hintA: court.querySelector('[data-jar-hint="A"]'),
     hintB: court.querySelector('[data-jar-hint="B"]'),
-    trayCount: court.querySelector('[data-tray-count="1"]'),
+    trayCaption: court.querySelector('[data-tray-caption="1"]'),
+    pileCountW: court.querySelector('[data-pile-count="white"]'),
+    pileCountB: court.querySelector('[data-pile-count="black"]'),
+    chipW: court.querySelector('[data-arm="white"]'),
+    chipB: court.querySelector('[data-arm="black"]'),
+    pileW: court.querySelector('.tray-pile.white'),
+    pileB: court.querySelector('.tray-pile.black'),
     figure, verdict,
     jarA: jA.card, jarB: jB.card,
     oddsValue: oddsPanel.querySelector("#odds-value"),
@@ -229,11 +248,11 @@ export function mount(root, { fx }) {
   }
 
   // ─── Layout: pack each container, animate moves with FLIP ───
-  function fit(layer, count, loc) {
+  function fit(layer, count, kind) {
     const r = layer.getBoundingClientRect();
     const W = r.width || 280;
     const H = r.height || 120;
-    const gap = loc === "tray" ? 5 : 3;
+    const gap = kind === "tray" ? 5 : 3;
     const min = 8;
     let size = 17;
     let cols = 1;
@@ -246,7 +265,7 @@ export function mount(root, { fx }) {
     return { W, H, size, cols, cell: size + gap };
   }
 
-  function positionFor(loc, i, f, m) {
+  function positionFor(kind, i, f, m) {
     const { cols, cell, size, W, H } = f;
     const col = i % cols;
     const row = Math.floor(i / cols);
@@ -254,10 +273,9 @@ export function mount(root, { fx }) {
     const slack = Math.max(0, cell - size) * 0.8;
     const jx = (rng() - 0.5) * slack;
     const jy = (rng() - 0.5) * slack;
-    const usedW = Math.min(cols, Math.max(1, cols)) * cell;
-    const x0 = (W - usedW) / 2;
+    const x0 = (W - cols * cell) / 2;
     const cx = x0 + col * cell + cell / 2 + jx;
-    const cy = loc === "tray"
+    const cy = kind === "tray"
       ? row * cell + cell / 2 + jy + 2
       : H - (row * cell + cell / 2) - jy - 2; // jars fill bottom-up
     return { x: cx - size / 2, y: cy - size / 2, size };
@@ -270,17 +288,20 @@ export function mount(root, { fx }) {
     const firsts = doAnim ? new Map() : null;
     if (doAnim) for (const m of marbles) if (m.id !== dragId) firsts.set(m, m.node.getBoundingClientRect());
 
-    const groups = { tray: [], A: [], B: [] };
-    for (const m of marbles) groups[m.loc].push(m);
+    const inHand = marbles.filter(m => m.loc === "tray");
+    const jobs = [
+      { layer: layers.A, kind: "jar", list: marbles.filter(m => m.loc === "A") },
+      { layer: layers.B, kind: "jar", list: marbles.filter(m => m.loc === "B") },
+      { layer: layers.trayW, kind: "tray", list: inHand.filter(m => m.color === "white") },
+      { layer: layers.trayB, kind: "tray", list: inHand.filter(m => m.color === "black") }
+    ];
 
-    for (const loc of ["tray", "A", "B"]) {
-      const layer = layers[loc];
-      const list = groups[loc];
-      const f = fit(layer, list.length, loc);
-      list.forEach((m, i) => {
+    for (const job of jobs) {
+      const f = fit(job.layer, job.list.length, job.kind);
+      job.list.forEach((m, i) => {
         if (m.id === dragId) return;
-        if (m.node.parentNode !== layer) layer.appendChild(m.node);
-        const p = positionFor(loc, i, f, m);
+        if (m.node.parentNode !== job.layer) job.layer.appendChild(m.node);
+        const p = positionFor(job.kind, i, f, m);
         m.node.style.transform = "";
         m.node.style.left = `${p.x}px`;
         m.node.style.top = `${p.y}px`;
@@ -321,9 +342,30 @@ export function mount(root, { fx }) {
     refs.countB.textContent = tB ? `${c.wB} white · ${c.bB} black (${tB})` : "empty";
     refs.oddsA.textContent = tA ? `${(100 * c.wA / tA).toFixed(1)}%` : "—";
     refs.oddsB.textContent = tB ? `${(100 * c.wB / tB).toFixed(1)}%` : "—";
-    refs.trayCount.textContent = inHand ? `${inHand} in hand · ${c.wT}w / ${c.bT}b` : "Empty — all placed";
     refs.hintA.style.opacity = tA ? "0" : "";
     refs.hintB.style.opacity = tB ? "0" : "";
+
+    // Hand piles: per-colour counts, armed state, and a plain-language caption.
+    refs.pileCountW.textContent = String(c.wT);
+    refs.pileCountB.textContent = String(c.bT);
+    const armW = armed.white && c.wT > 0;
+    const armB = armed.black && c.bT > 0;
+    refs.chipW.classList.toggle("armed", armed.white);
+    refs.chipB.classList.toggle("armed", armed.black);
+    refs.chipW.setAttribute("aria-pressed", String(armed.white));
+    refs.chipB.setAttribute("aria-pressed", String(armed.black));
+    refs.chipW.disabled = c.wT === 0;
+    refs.chipB.disabled = c.bT === 0;
+    refs.pileW.classList.toggle("dim", !armed.white);
+    refs.pileB.classList.toggle("dim", !armed.black);
+    refs.pileW.classList.toggle("depleted", c.wT === 0);
+    refs.pileB.classList.toggle("depleted", c.bT === 0);
+    if (inHand === 0) {
+      refs.trayCaption.textContent = "Hand empty — all 100 placed";
+    } else {
+      const pours = `${armW ? "white" : ""}${armW && armB ? " + " : ""}${armB ? "black" : ""}` || "nothing — tap a pile";
+      refs.trayCaption.textContent = `Hold a jar to pour ${pours} · ${inHand} in hand`;
+    }
 
     if (bothFilled) {
       refs.oddsValue.textContent = fmtPct(chance);
@@ -449,6 +491,26 @@ export function mount(root, { fx }) {
     node.addEventListener("pointercancel", up);
   }
 
+  // Pick the next marble to pour, honouring the armed colours. When both
+  // are armed, alternate so the stream feels like a genuine mix.
+  function nextPourMarble() {
+    const hand = marbles.filter(m => m.loc === "tray");
+    const whites = hand.filter(m => m.color === "white");
+    const blacks = hand.filter(m => m.color === "black");
+    const wantW = armed.white && whites.length;
+    const wantB = armed.black && blacks.length;
+    let pool = null;
+    if (wantW && wantB) {
+      pool = (pourTurn % 2 === 0) ? whites : blacks;
+      pourTurn += 1;
+    } else if (wantW) {
+      pool = whites;
+    } else if (wantB) {
+      pool = blacks;
+    }
+    return pool && pool.length ? pool[pool.length - 1] : null;
+  }
+
   function beginPour(loc, glass, ev) {
     let active = true;
     let timer = 0;
@@ -456,9 +518,9 @@ export function mount(root, { fx }) {
     glass.classList.add("pouring");
     const pourOne = () => {
       if (!active) return;
-      const hand = marbles.filter(x => x.loc === "tray");
-      if (!hand.length) { stop(); return; }
-      hand[hand.length - 1].loc = loc;
+      const m = nextPourMarble();
+      if (!m) { stop(); return; }
+      m.loc = loc;
       layoutAll(true);
       afterChange();
       timer = window.setTimeout(pourOne, POUR_INTERVAL);
@@ -487,6 +549,22 @@ export function mount(root, { fx }) {
 
   function afterChange() {
     render(); // render() owns crown detection + de-duplication
+  }
+
+  // Tap a pile to pour only that colour; tap the already-sole pile to go
+  // back to pouring both. Always leaves at least one colour armed.
+  function tapPile(color) {
+    if (stats.busy) return;
+    const other = color === "white" ? "black" : "white";
+    if (armed[color] && !armed[other]) {
+      armed.white = true;
+      armed.black = true;
+    } else {
+      armed[color] = true;
+      armed[other] = false;
+    }
+    pourTurn = 0;
+    render();
   }
 
   // ─── The draw ───
@@ -616,6 +694,7 @@ export function mount(root, { fx }) {
 
   function reset() {
     for (const m of marbles) m.loc = "tray";
+    armed.white = true; armed.black = true; pourTurn = 0;
     stats.draws = 0; stats.wins = 0; stats.history = []; stats.crowned = false;
     refs.verdict.className = "verdict";
     refs.verdict.textContent = "Drag marbles into both jars — or hold over a jar to pour. Then let the emperor draw.";
@@ -626,6 +705,8 @@ export function mount(root, { fx }) {
 
   // ─── Wire ───
   court.addEventListener("pointerdown", onPointerDown);
+  refs.chipW.addEventListener("click", () => tapPile("white"));
+  refs.chipB.addEventListener("click", () => tapPile("black"));
   refs.drawBtn.addEventListener("click", drawOne);
   refs.bestBtn.addEventListener("click", showBest);
   refs.chaosBtn.addEventListener("click", chaosSplit);
