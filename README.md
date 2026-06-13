@@ -2,7 +2,10 @@
 
 Classic logic and probability puzzles, made playable in the browser.
 
-**Live:** https://skyflyt.github.io/riddlebox/
+**Live:**
+
+- GitHub Pages: <https://skyflyt.github.io/riddlebox/>
+- here.now (edge-hosted via Cloudflare): <https://proud-marsh-6hvx.here.now/>
 
 Each riddle is set up as a real interactive scene — read the story, try the
 trick, then reveal the math. Vanilla JavaScript, no build step, no servers,
