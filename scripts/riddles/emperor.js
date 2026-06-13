@@ -1,31 +1,13 @@
-import { el, clear, toast, flashScreen } from "../shared/ui.js";
+import { el, toast, flashScreen } from "../shared/ui.js";
 import { centerOf } from "../shared/fx.js";
 
 const TOTAL_WHITE = 50;
 const TOTAL_BLACK = 50;
 const MAX_CHANCE = 0.5 + 0.5 * (49 / 99);
 const HISTORY_LIMIT = 6;
-
-function chanceFor(wA, bA) {
-  const wB = TOTAL_WHITE - wA;
-  const bB = TOTAL_BLACK - bA;
-  const tA = wA + bA;
-  const tB = wB + bB;
-  if (tA === 0 || tB === 0) return 0;
-  return 0.5 * (wA / tA) + 0.5 * (wB / tB);
-}
+const POUR_INTERVAL = 70;
 
 function fmtPct(v) { return `${(v * 100).toFixed(2)}%`; }
-
-function clampSplit(nw, nb) {
-  let w = Math.max(0, Math.min(TOTAL_WHITE, Math.round(Number(nw) || 0)));
-  let b = Math.max(0, Math.min(TOTAL_BLACK, Math.round(Number(nb) || 0)));
-  if (w + b === 0) w = 1;
-  if ((TOTAL_WHITE - w) + (TOTAL_BLACK - b) === 0) {
-    if (b > 0) b -= 1; else w -= 1;
-  }
-  return { w, b };
-}
 
 function seeded(seed) {
   let t = seed + 0x6D2B79F5;
@@ -36,33 +18,6 @@ function seeded(seed) {
     r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
     return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
   };
-}
-
-function renderMarbles(container, white, black, key) {
-  const total = white + black;
-  const frag = document.createDocumentFragment();
-  const kinds = [];
-  for (let i = 0; i < white; i += 1) kinds.push("white");
-  for (let i = 0; i < black; i += 1) kinds.push("black");
-
-  kinds.forEach((kind, i) => {
-    const rng = seeded(key * 991 + i * 73 + total * 17 + (kind === "white" ? 13 : 29));
-    const cols = total > 30 ? 10 : 7;
-    const row = Math.floor(i / cols);
-    const col = i % cols;
-    const xStep = cols > 1 ? 100 / cols : 50;
-    const x = xStep / 2 + col * xStep + (rng() - 0.5) * (xStep * 0.5);
-    const y = 90 - row * 7 - rng() * 4;
-    const m = document.createElement("span");
-    m.className = `marble ${kind}`;
-    m.style.setProperty("--x", `${Math.max(8, Math.min(92, x))}%`);
-    m.style.setProperty("--y", `${Math.max(14, Math.min(92, y))}%`);
-    m.style.setProperty("--s", `${10 + rng() * 6}px`);
-    m.style.setProperty("--delay", `${-rng() * 2400}ms`);
-    frag.appendChild(m);
-  });
-
-  container.replaceChildren(frag);
 }
 
 function emperorSvg() {
@@ -89,97 +44,108 @@ function emperorSvg() {
 }
 
 export function mount(root, { fx }) {
-  const state = { wA: 25, bA: 25 };
-  const stats = { draws: 0, wins: 0, history: [], best: chanceFor(25, 25), bestToast: false, busy: false };
+  // ─── Marble model: 100 persistent objects, each with a home (tray / A / B) ───
+  const marbles = [];
+  const nodeToMarble = new WeakMap();
+  let idc = 0;
+  function makeMarble(color) {
+    const id = idc++;
+    const node = document.createElement("span");
+    node.className = `marble ${color}`;
+    node.dataset.id = String(id);
+    const m = { id, color, loc: "tray", node, seed: id * 991 + (color === "white" ? 13 : 29) };
+    nodeToMarble.set(node, m);
+    return m;
+  }
+  // Interleave colours so the tray reads as a real mixed pile.
+  for (let i = 0; i < Math.max(TOTAL_WHITE, TOTAL_BLACK); i += 1) {
+    if (i < TOTAL_WHITE) marbles.push(makeMarble("white"));
+    if (i < TOTAL_BLACK) marbles.push(makeMarble("black"));
+  }
 
-  // Build DOM
+  const stats = { draws: 0, wins: 0, history: [], busy: false, crowned: false };
+
+  // ─── Build DOM ───
   const head = el("div", { class: "scene-head" }, [
     el("span", { class: "scene-eyebrow", text: "Probability · The Emperor's Proposition" }),
     el("h1", { class: "scene-title", text: "Split the marbles. Bet your life." }),
-    el("p", { class: "scene-lede", text: "You stand before the emperor with 50 white and 50 black marbles and two empty jars. Place every marble. He'll close his eyes, pick a jar at random, and draw one marble. White: you walk free. Black: you don't." })
+    el("p", { class: "scene-lede", text: "You stand before the emperor with 50 white and 50 black marbles and two empty jars. Place every marble — into either jar, however you like. He'll close his eyes, pick a jar at random, and draw one marble. White: you walk free. Black: you don't." })
   ]);
 
   const grid = el("div", { class: "scene-grid" });
 
-  // ─── LEFT: Stage ───
+  // ─── LEFT: the court ───
   const court = el("div", { class: "emperor-court" });
   const figure = el("div", { class: "emperor-figure", html: emperorSvg() });
-  const jarA = el("div", { class: "jar-card", "data-jar": "A" }, [
-    el("div", { class: "jar-head" }, [
-      el("div", { class: "jar-label" }, [
-        el("span", { class: "jar-letter", text: "Jar A" }),
-        el("span", { class: "jar-count", "data-jar-count": "A", text: "25 + 25" })
-      ]),
-      el("span", { class: "jar-odds", "data-jar-odds": "A", text: "50.00%" })
-    ]),
-    el("div", { class: "jar-glass" }, [el("div", { class: "marbles", "data-marbles": "A" })])
-  ]);
-  const jarB = el("div", { class: "jar-card", "data-jar": "B" }, [
-    el("div", { class: "jar-head" }, [
-      el("div", { class: "jar-label" }, [
-        el("span", { class: "jar-letter", text: "Jar B" }),
-        el("span", { class: "jar-count", "data-jar-count": "B", text: "25 + 25" })
-      ]),
-      el("span", { class: "jar-odds", "data-jar-odds": "B", text: "50.00%" })
-    ]),
-    el("div", { class: "jar-glass" }, [el("div", { class: "marbles", "data-marbles": "B" })])
-  ]);
-  const jars = el("div", { class: "jars" }, [jarA, jarB]);
-  const verdict = el("div", { class: "verdict", text: "Set the split. Then ask the emperor to draw." });
-  court.append(figure, jars, verdict);
 
-  // ─── RIGHT: Controls ───
+  function jarCard(letter) {
+    const glass = el("div", { class: "jar-glass", "data-jar": letter }, [
+      el("span", { class: "jar-mouth", "aria-hidden": "true" }),
+      el("span", { class: "jar-hint", "data-jar-hint": letter, text: "hold to pour" }),
+      el("div", { class: "marbles", "data-marbles": letter })
+    ]);
+    const card = el("div", { class: "jar-card", "data-jar": letter }, [
+      el("div", { class: "jar-head" }, [
+        el("div", { class: "jar-label" }, [
+          el("span", { class: "jar-letter", text: `Jar ${letter}` }),
+          el("span", { class: "jar-count", "data-jar-count": letter, text: "empty" })
+        ]),
+        el("span", { class: "jar-odds", "data-jar-odds": letter, text: "—" })
+      ]),
+      glass
+    ]);
+    return { card, glass };
+  }
+  const jA = jarCard("A");
+  const jB = jarCard("B");
+  const jars = el("div", { class: "jars" }, [jA.card, jB.card]);
+
+  const tray = el("div", { class: "tray-card" }, [
+    el("div", { class: "tray-head" }, [
+      el("span", { class: "tray-title", text: "Marbles in hand" }),
+      el("span", { class: "tray-count", "data-tray-count": "1", text: "100 in hand · 50w / 50b" })
+    ]),
+    el("div", { class: "tray-basin", "data-basin": "tray" }, [
+      el("div", { class: "marbles", "data-marbles": "tray" })
+    ])
+  ]);
+
+  const verdict = el("div", { class: "verdict", text: "Drag marbles into both jars — or hold over a jar to pour. Then let the emperor draw." });
+  court.append(figure, jars, tray, verdict);
+
+  // ─── RIGHT: controls ───
   const controls = el("div", {});
 
   const story = el("section", { class: "panel" }, [
-    el("h2", { class: "panel-title", text: "How it works" }),
+    el("h2", { class: "panel-title", text: "How to play" }),
     el("ol", { class: "story-steps" }, [
-      el("li", { html: "<strong>Place every marble.</strong> 50 white and 50 black, split between two jars however you want." }),
-      el("li", { html: "<strong>Neither jar may be empty.</strong> Even a single marble counts." }),
-      el("li", { html: "<strong>The emperor picks a jar at random</strong>, then pulls one marble. White means freedom." })
+      el("li", { html: "<strong>Drag marbles</strong> from your hand into either jar. Drag between jars to rebalance. Both jars take any colour." }),
+      el("li", { html: "<strong>Hold over a jar to pour</strong> a stream from your hand. <strong>Tap a marble in a jar</strong> to drop it back." }),
+      el("li", { html: "<strong>Place all 100</strong> with neither jar empty, then the emperor picks a jar and pulls one marble. White means freedom." })
     ])
   ]);
 
   const oddsPanel = el("section", { class: "panel" }, [
     el("div", { class: "panel-row" }, [
       el("h2", { class: "panel-title", text: "Your odds" }),
-      el("span", { class: "pill", id: "rank-pill", text: "Fair coin" })
+      el("span", { class: "pill", id: "rank-pill", text: "Empty jars" })
     ]),
     el("div", { class: "odds-readout" }, [
-      el("div", { class: "odds-value", id: "odds-value", text: "50.00%" }),
+      el("div", { class: "odds-value", id: "odds-value", text: "—" }),
       el("div", { class: "odds-meter" }, [
         el("span", { id: "odds-fill" }),
         el("i", { class: "odds-marker fifty", title: "50% baseline" }),
         el("i", { class: "odds-marker cap", title: "74.747% ceiling" })
       ])
     ]),
-    el("p", { class: "card-blurb", id: "rank-note", style: { marginTop: "10px" }, text: "Start by sliding the split." })
-  ]);
-
-  function sliderRow(kind, max, valueId, label) {
-    return el("div", { class: "slider-row" }, [
-      el("div", { class: "row-head" }, [
-        el("span", { text: label }),
-        el("span", { class: "value", id: valueId, text: "25" })
-      ]),
-      el("div", { class: "stepper" }, [
-        el("button", { type: "button", "data-step": `${kind}:-1`, "aria-label": `Move one ${kind} from Jar A` }, ["−"]),
-        el("input", { id: `${kind}-slider`, type: "range", min: "0", max: String(max), value: "25" }),
-        el("button", { type: "button", "data-step": `${kind}:1`, "aria-label": `Move one ${kind} to Jar A` }, ["+"])
-      ])
-    ]);
-  }
-
-  const splitPanel = el("section", { class: "panel" }, [
-    el("h2", { class: "panel-title", text: "Jar A holds…" }),
-    sliderRow("white", TOTAL_WHITE, "white-value", "White marbles"),
-    sliderRow("black", TOTAL_BLACK, "black-value", "Black marbles")
+    el("p", { class: "card-blurb", id: "rank-note", style: { marginTop: "10px" }, text: "Start dropping marbles into both jars." })
   ]);
 
   const actions = el("section", { class: "panel" }, [
-    el("button", { class: "btn primary", id: "draw-btn", style: { width: "100%" } }, ["Let the emperor draw"]),
+    el("button", { class: "btn primary", id: "draw-btn", style: { width: "100%" }, disabled: true }, ["Let the emperor draw"]),
     el("div", { class: "btn-group", style: { marginTop: "10px" } }, [
-      el("button", { class: "btn ghost", id: "best-btn" }, ["Show the trick"]),
+      el("button", { class: "btn ghost", id: "best-btn" }, ["Show best split"]),
+      el("button", { class: "btn ghost", id: "chaos-btn" }, ["Chaos split"]),
       el("button", { class: "btn ghost", id: "sim-btn" }, ["Run 1,000 draws"]),
       el("button", { class: "btn ghost", id: "reset-btn" }, ["Reset"])
     ])
@@ -200,38 +166,57 @@ export function mount(root, { fx }) {
     el("p", { class: "card-blurb", text: "You can't beat that. Any other split either dilutes the lone-white jar or thickens the other one with black." })
   ]);
 
-  controls.append(story, oddsPanel, splitPanel, actions, historyPanel);
-
+  controls.append(story, oddsPanel, actions, historyPanel);
   grid.append(court, controls);
   root.append(head, grid, solution);
 
   // ─── Refs ───
+  const layers = {
+    tray: tray.querySelector('[data-marbles="tray"]'),
+    A: jA.glass.querySelector('[data-marbles="A"]'),
+    B: jB.glass.querySelector('[data-marbles="B"]')
+  };
+  const dropTargets = { tray: tray.querySelector('[data-basin="tray"]'), A: jA.glass, B: jB.glass };
   const refs = {
-    marblesA: court.querySelector('[data-marbles="A"]'),
-    marblesB: court.querySelector('[data-marbles="B"]'),
     countA: court.querySelector('[data-jar-count="A"]'),
     countB: court.querySelector('[data-jar-count="B"]'),
     oddsA: court.querySelector('[data-jar-odds="A"]'),
     oddsB: court.querySelector('[data-jar-odds="B"]'),
-    figure,
-    jarA, jarB,
-    verdict,
+    hintA: court.querySelector('[data-jar-hint="A"]'),
+    hintB: court.querySelector('[data-jar-hint="B"]'),
+    trayCount: court.querySelector('[data-tray-count="1"]'),
+    figure, verdict,
+    jarA: jA.card, jarB: jB.card,
     oddsValue: oddsPanel.querySelector("#odds-value"),
     oddsFill: oddsPanel.querySelector("#odds-fill"),
     rankPill: oddsPanel.querySelector("#rank-pill"),
     rankNote: oddsPanel.querySelector("#rank-note"),
-    whiteSlider: splitPanel.querySelector("#white-slider"),
-    blackSlider: splitPanel.querySelector("#black-slider"),
-    whiteValue: splitPanel.querySelector("#white-value"),
-    blackValue: splitPanel.querySelector("#black-value"),
     drawBtn: actions.querySelector("#draw-btn"),
     bestBtn: actions.querySelector("#best-btn"),
+    chaosBtn: actions.querySelector("#chaos-btn"),
     simBtn: actions.querySelector("#sim-btn"),
     resetBtn: actions.querySelector("#reset-btn"),
     history: historyPanel.querySelector("#history"),
     streak: historyPanel.querySelector("#streak"),
     solution
   };
+
+  // ─── Counts & probability ───
+  function tally() {
+    const c = { wA: 0, bA: 0, wB: 0, bB: 0, wT: 0, bT: 0 };
+    for (const m of marbles) {
+      const key = (m.color === "white" ? "w" : "b") + (m.loc === "tray" ? "T" : m.loc);
+      c[key] += 1;
+    }
+    return c;
+  }
+
+  function chanceFromCounts(c) {
+    const tA = c.wA + c.bA;
+    const tB = c.wB + c.bB;
+    if (tA === 0 || tB === 0) return 0;
+    return 0.5 * (c.wA / tA) + 0.5 * (c.wB / tB);
+  }
 
   function rankFor(c) {
     if (c >= MAX_CHANCE - 1e-7) return ["good", "Crown split", "This is the ceiling. The emperor is furious."];
@@ -240,60 +225,139 @@ export function mount(root, { fx }) {
     if (c >= 0.56) return ["info", "Tilted", "Better than fair, not yet impressive."];
     if (c > 0.5001) return ["info", "Hairline edge", "Technically winning. Spiritually suspicious."];
     if (c < 0.4999) return ["bad", "Cursed split", "You're helping the black marbles. Bold choice."];
-    return ["", "Fair coin", "Start sliding. Asymmetry is your friend."];
+    return ["", "Fair coin", "Asymmetry is your friend. Lonelier jars win harder."];
   }
 
-  function setSplit(nw, nb, sparkle = true) {
-    const { w, b } = clampSplit(nw, nb);
-    state.wA = w;
-    state.bA = b;
-    render();
-    if (sparkle) {
-      const c = chanceFor(state.wA, state.bA);
-      const rect = refs.oddsValue.getBoundingClientRect();
-      const palette = c > 0.7 ? ["#f4c35b", "#fffaf0", "#4ade80"] : ["#94a3b8", "#f4c35b"];
-      fx.burst(rect.left + rect.width / 2, rect.top + rect.height / 2, palette, c > 0.7 ? 22 : 8, 4);
+  // ─── Layout: pack each container, animate moves with FLIP ───
+  function fit(layer, count, loc) {
+    const r = layer.getBoundingClientRect();
+    const W = r.width || 280;
+    const H = r.height || 120;
+    const gap = loc === "tray" ? 5 : 3;
+    const min = 8;
+    let size = 17;
+    let cols = 1;
+    for (; size >= min; size -= 1) {
+      const cell = size + gap;
+      cols = Math.max(1, Math.floor(W / cell));
+      const rows = Math.ceil(Math.max(count, 1) / cols);
+      if (rows * cell <= H || size === min) break;
+    }
+    return { W, H, size, cols, cell: size + gap };
+  }
+
+  function positionFor(loc, i, f, m) {
+    const { cols, cell, size, W, H } = f;
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    const rng = seeded(m.seed);
+    const slack = Math.max(0, cell - size) * 0.8;
+    const jx = (rng() - 0.5) * slack;
+    const jy = (rng() - 0.5) * slack;
+    const usedW = Math.min(cols, Math.max(1, cols)) * cell;
+    const x0 = (W - usedW) / 2;
+    const cx = x0 + col * cell + cell / 2 + jx;
+    const cy = loc === "tray"
+      ? row * cell + cell / 2 + jy + 2
+      : H - (row * cell + cell / 2) - jy - 2; // jars fill bottom-up
+    return { x: cx - size / 2, y: cy - size / 2, size };
+  }
+
+  let dragId = -1; // marble currently being hand-dragged (excluded from FLIP)
+
+  function layoutAll(animate) {
+    const doAnim = animate && !fx.reduced;
+    const firsts = doAnim ? new Map() : null;
+    if (doAnim) for (const m of marbles) if (m.id !== dragId) firsts.set(m, m.node.getBoundingClientRect());
+
+    const groups = { tray: [], A: [], B: [] };
+    for (const m of marbles) groups[m.loc].push(m);
+
+    for (const loc of ["tray", "A", "B"]) {
+      const layer = layers[loc];
+      const list = groups[loc];
+      const f = fit(layer, list.length, loc);
+      list.forEach((m, i) => {
+        if (m.id === dragId) return;
+        if (m.node.parentNode !== layer) layer.appendChild(m.node);
+        const p = positionFor(loc, i, f, m);
+        m.node.style.transform = "";
+        m.node.style.left = `${p.x}px`;
+        m.node.style.top = `${p.y}px`;
+        m.node.style.width = `${p.size}px`;
+        m.node.style.height = `${p.size}px`;
+      });
+    }
+
+    if (doAnim) {
+      for (const m of marbles) {
+        if (m.id === dragId || !firsts.has(m)) continue;
+        const first = firsts.get(m);
+        const last = m.node.getBoundingClientRect();
+        const dx = first.left - last.left;
+        const dy = first.top - last.top;
+        if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+          m.node.animate(
+            [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "translate(0, 0)" }],
+            { duration: 420, easing: "cubic-bezier(.2,.8,.2,1)" }
+          );
+        }
+      }
     }
   }
 
+  // ─── Render readouts ───
   function render() {
-    const wB = TOTAL_WHITE - state.wA;
-    const bB = TOTAL_BLACK - state.bA;
-    const tA = state.wA + state.bA;
-    const tB = wB + bB;
-    const chance = chanceFor(state.wA, state.bA);
-    const oddsA = tA > 0 ? state.wA / tA : 0;
-    const oddsB = tB > 0 ? wB / tB : 0;
+    const c = tally();
+    const tA = c.wA + c.bA;
+    const tB = c.wB + c.bB;
+    const inHand = c.wT + c.bT;
+    const bothFilled = tA > 0 && tB > 0;
+    const placed = inHand === 0;
+    const valid = placed && bothFilled;
+    const chance = bothFilled ? chanceFromCounts(c) : 0;
 
-    refs.countA.textContent = `${state.wA} white · ${state.bA} black (${tA})`;
-    refs.countB.textContent = `${wB} white · ${bB} black (${tB})`;
-    refs.oddsA.textContent = `${(oddsA * 100).toFixed(1)}%`;
-    refs.oddsB.textContent = `${(oddsB * 100).toFixed(1)}%`;
-    refs.oddsValue.textContent = fmtPct(chance);
-    refs.oddsFill.style.setProperty("--chance", `${chance * 100}%`);
-    refs.oddsFill.style.width = `${chance * 100}%`;
-    refs.whiteValue.textContent = state.wA;
-    refs.blackValue.textContent = state.bA;
-    refs.whiteSlider.value = String(state.wA);
-    refs.blackSlider.value = String(state.bA);
+    refs.countA.textContent = tA ? `${c.wA} white · ${c.bA} black (${tA})` : "empty";
+    refs.countB.textContent = tB ? `${c.wB} white · ${c.bB} black (${tB})` : "empty";
+    refs.oddsA.textContent = tA ? `${(100 * c.wA / tA).toFixed(1)}%` : "—";
+    refs.oddsB.textContent = tB ? `${(100 * c.wB / tB).toFixed(1)}%` : "—";
+    refs.trayCount.textContent = inHand ? `${inHand} in hand · ${c.wT}w / ${c.bT}b` : "Empty — all placed";
+    refs.hintA.style.opacity = tA ? "0" : "";
+    refs.hintB.style.opacity = tB ? "0" : "";
 
-    const [pillKind, title, note] = rankFor(chance);
+    if (bothFilled) {
+      refs.oddsValue.textContent = fmtPct(chance);
+      refs.oddsFill.style.width = `${chance * 100}%`;
+    } else {
+      refs.oddsValue.textContent = "—";
+      refs.oddsFill.style.width = "0%";
+    }
+
+    let pillKind, title, note;
+    if (!bothFilled) {
+      [pillKind, title, note] = ["", "Empty jars", placed
+        ? "One jar is empty — the emperor needs a choice."
+        : "Drop marbles into both jars to see your odds."];
+    } else {
+      [pillKind, title, note] = rankFor(chance);
+      if (!placed) note = `${note} (${inHand} still in hand — place them to draw)`;
+    }
     refs.rankPill.className = `pill ${pillKind}`;
     refs.rankPill.textContent = title;
     refs.rankNote.textContent = note;
 
-    if (chance > stats.best) stats.best = chance;
+    refs.drawBtn.disabled = stats.busy || !valid;
 
-    if (chance >= MAX_CHANCE - 1e-7 && !stats.bestToast) {
-      stats.bestToast = true;
+    if (valid && chance >= MAX_CHANCE - 1e-7 && !stats.crowned) {
+      stats.crowned = true;
       toast("Crown split found: 1 white in Jar A, everything else in Jar B.");
       const r = refs.oddsValue.getBoundingClientRect();
       fx.burst(r.left + r.width / 2, r.top + r.height / 2, ["#f4c35b", "#fffaf0", "#4ade80", "#60a5fa"], 110, 12);
       flashScreen();
+    } else if (chance < MAX_CHANCE - 1e-7) {
+      stats.crowned = false;
     }
 
-    renderMarbles(refs.marblesA, state.wA, state.bA, 1);
-    renderMarbles(refs.marblesB, wB, bB, 2);
     renderHistory();
   }
 
@@ -323,23 +387,109 @@ export function mount(root, { fx }) {
       });
     }
     refs.history.replaceChildren(frag);
+    refs.streak.textContent = stats.draws === 0 ? "—" : `${stats.wins}/${stats.draws} wins · ${fmtPct(stats.wins / stats.draws)}`;
+  }
 
-    if (stats.draws === 0) {
-      refs.streak.textContent = "—";
-    } else {
-      refs.streak.textContent = `${stats.wins}/${stats.draws} wins · ${fmtPct(stats.wins / stats.draws)}`;
+  // ─── Pointer gestures: drag a marble, tap to return, hold-to-pour ───
+  function targetAt(x, y) {
+    for (const loc of ["A", "B", "tray"]) {
+      const r = dropTargets[loc].getBoundingClientRect();
+      if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return loc;
     }
+    return null;
   }
 
-  function setBusy(b) {
-    stats.busy = b;
-    refs.drawBtn.disabled = b;
-    refs.bestBtn.disabled = b;
-    refs.simBtn.disabled = b;
-    refs.resetBtn.disabled = b;
-    splitPanel.querySelectorAll("[data-step]").forEach(btn => { btn.disabled = b; });
+  function setHighlight(loc) {
+    for (const k of ["A", "B", "tray"]) dropTargets[k].classList.toggle("drop-active", k === loc);
+  }
+  function clearHighlight() { setHighlight(null); }
+
+  function beginDrag(node, ev) {
+    const m = nodeToMarble.get(node);
+    if (!m) return;
+    let dragging = false;
+    const startX = ev.clientX;
+    const startY = ev.clientY;
+    try { node.setPointerCapture(ev.pointerId); } catch {}
+
+    const move = (e) => {
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      if (!dragging && Math.hypot(dx, dy) > 6) {
+        dragging = true;
+        dragId = m.id;
+        node.classList.add("dragging");
+      }
+      if (dragging) {
+        node.style.transform = `translate(${dx}px, ${dy}px) scale(1.3)`;
+        setHighlight(targetAt(e.clientX, e.clientY));
+      }
+    };
+    const up = (e) => {
+      node.removeEventListener("pointermove", move);
+      node.removeEventListener("pointerup", up);
+      node.removeEventListener("pointercancel", up);
+      try { node.releasePointerCapture(ev.pointerId); } catch {}
+      clearHighlight();
+      node.classList.remove("dragging");
+      dragId = -1;
+      if (!dragging) {
+        // Tap: a marble resting in a jar goes back to your hand.
+        if (m.loc !== "tray") { m.loc = "tray"; layoutAll(true); afterChange(); }
+        else { node.style.transform = ""; }
+        return;
+      }
+      const target = targetAt(e.clientX, e.clientY);
+      if (target && target !== m.loc) m.loc = target;
+      layoutAll(true);
+      afterChange();
+    };
+    node.addEventListener("pointermove", move);
+    node.addEventListener("pointerup", up);
+    node.addEventListener("pointercancel", up);
   }
 
+  function beginPour(loc, glass, ev) {
+    let active = true;
+    let timer = 0;
+    try { glass.setPointerCapture(ev.pointerId); } catch {}
+    glass.classList.add("pouring");
+    const pourOne = () => {
+      if (!active) return;
+      const hand = marbles.filter(x => x.loc === "tray");
+      if (!hand.length) { stop(); return; }
+      hand[hand.length - 1].loc = loc;
+      layoutAll(true);
+      afterChange();
+      timer = window.setTimeout(pourOne, POUR_INTERVAL);
+    };
+    function stop() {
+      if (!active) return;
+      active = false;
+      window.clearTimeout(timer);
+      glass.classList.remove("pouring");
+      try { glass.releasePointerCapture(ev.pointerId); } catch {}
+      glass.removeEventListener("pointerup", stop);
+      glass.removeEventListener("pointercancel", stop);
+    }
+    glass.addEventListener("pointerup", stop);
+    glass.addEventListener("pointercancel", stop);
+    pourOne(); // a quick tap pours exactly one
+  }
+
+  function onPointerDown(e) {
+    if (stats.busy || e.button === 2) return;
+    const marbleEl = e.target.closest(".marble");
+    if (marbleEl) { e.preventDefault(); beginDrag(marbleEl, e); return; }
+    const glass = e.target.closest(".jar-glass");
+    if (glass) { e.preventDefault(); beginPour(glass.dataset.jar, glass, e); }
+  }
+
+  function afterChange() {
+    render(); // render() owns crown detection + de-duplication
+  }
+
+  // ─── The draw ───
   function wait(ms) { return new Promise(res => setTimeout(res, ms)); }
 
   async function flyMarble(from, to, kind) {
@@ -355,22 +505,31 @@ export function mount(root, { fx }) {
       { transform: `translate(${(to.x - from.x) * 0.5}px, ${arc}px) scale(1.5)` },
       { transform: `translate(${to.x - from.x}px, ${to.y - from.y}px) scale(1)` }
     ], { duration: 800, easing: "cubic-bezier(.17,.84,.26,1)" });
-    try { await anim.finished; } catch {}
+    // Race a timeout so a backgrounded tab (where WAAPI pauses and
+    // anim.finished never settles) can't strand the scene mid-draw.
+    await Promise.race([anim.finished.catch(() => {}), wait(1100)]);
     m.remove();
   }
 
   function sampleDraw() {
-    const wB = TOTAL_WHITE - state.wA;
-    const bB = TOTAL_BLACK - state.bA;
+    const c = tally();
     const jar = Math.random() < 0.5 ? "A" : "B";
-    const wCount = jar === "A" ? state.wA : wB;
-    const bCount = jar === "A" ? state.bA : bB;
-    const total = wCount + bCount;
-    return { jar, white: total > 0 && Math.random() < wCount / total };
+    const w = jar === "A" ? c.wA : c.wB;
+    const b = jar === "A" ? c.bA : c.bB;
+    const total = w + b;
+    return { jar, white: total > 0 && Math.random() < w / total };
+  }
+
+  function setBusy(b) {
+    stats.busy = b;
+    [refs.drawBtn, refs.bestBtn, refs.chaosBtn, refs.simBtn, refs.resetBtn].forEach(btn => { btn.disabled = b; });
+    if (!b) render();
   }
 
   async function drawOne() {
     if (stats.busy) return;
+    const c = tally();
+    if (c.wT + c.bT !== 0 || (c.wA + c.bA) === 0 || (c.wB + c.bB) === 0) return;
     setBusy(true);
     const result = sampleDraw();
     const station = result.jar === "A" ? refs.jarA : refs.jarB;
@@ -409,11 +568,13 @@ export function mount(root, { fx }) {
 
   function simulate(rounds = 1000) {
     if (stats.busy) return;
-    let wins = 0;
-    for (let i = 0; i < rounds; i += 1) {
-      const r = sampleDraw();
-      if (r.white) wins += 1;
+    const c = tally();
+    if (c.wT + c.bT !== 0 || (c.wA + c.bA) === 0 || (c.wB + c.bB) === 0) {
+      toast("Fill both jars with all 100 marbles first.");
+      return;
     }
+    let wins = 0;
+    for (let i = 0; i < rounds; i += 1) if (sampleDraw().white) wins += 1;
     stats.draws += rounds;
     stats.wins += wins;
     stats.history.unshift({ batch: true, white: wins / rounds > 0.5, label: `${rounds} draws · ${wins} white (${fmtPct(wins / rounds)})` });
@@ -425,34 +586,61 @@ export function mount(root, { fx }) {
     renderHistory();
   }
 
-  // ─── Wire ───
-  refs.whiteSlider.addEventListener("input", e => setSplit(e.target.value, state.bA, false));
-  refs.blackSlider.addEventListener("input", e => setSplit(state.wA, e.target.value, false));
-  splitPanel.querySelectorAll("[data-step]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const [kind, amount] = btn.dataset.step.split(":");
-      const n = Number(amount);
-      if (kind === "white") setSplit(state.wA + n, state.bA);
-      else setSplit(state.wA, state.bA + n);
-    });
-  });
-  refs.drawBtn.addEventListener("click", drawOne);
-  refs.bestBtn.addEventListener("click", () => {
-    setSplit(1, 0);
+  // ─── Bulk configurations ───
+  function showBest() {
+    if (stats.busy) return;
+    let firstWhite = true;
+    for (const m of marbles) {
+      if (m.color === "white" && firstWhite) { m.loc = "A"; firstWhite = false; }
+      else m.loc = "B";
+    }
+    layoutAll(true);
+    afterChange();
+    refs.verdict.className = "verdict";
+    refs.verdict.textContent = "1 white in Jar A. Everything else in Jar B. Now ask him to draw.";
     refs.solution.hidden = false;
     refs.solution.scrollIntoView({ behavior: "smooth", block: "nearest" });
     toast("The trap is set.");
-  });
-  refs.simBtn.addEventListener("click", () => simulate(1000));
-  refs.resetBtn.addEventListener("click", () => {
-    state.wA = 25; state.bA = 25;
-    stats.draws = 0; stats.wins = 0; stats.history = []; stats.best = chanceFor(25, 25); stats.bestToast = false;
-    refs.verdict.className = "verdict";
-    refs.verdict.textContent = "Set the split. Then ask the emperor to draw.";
-    refs.solution.hidden = true;
-    render();
-  });
+  }
 
+  function chaosSplit() {
+    if (stats.busy) return;
+    for (const m of marbles) m.loc = Math.random() < 0.5 ? "A" : "B";
+    if (marbles.every(m => m.loc === "B")) marbles[0].loc = "A";
+    if (marbles.every(m => m.loc === "A")) marbles[0].loc = "B";
+    layoutAll(true);
+    afterChange();
+    refs.verdict.className = "verdict";
+    refs.verdict.textContent = "Marbles flung at random. Let's see what fate you built.";
+  }
+
+  function reset() {
+    for (const m of marbles) m.loc = "tray";
+    stats.draws = 0; stats.wins = 0; stats.history = []; stats.crowned = false;
+    refs.verdict.className = "verdict";
+    refs.verdict.textContent = "Drag marbles into both jars — or hold over a jar to pour. Then let the emperor draw.";
+    refs.solution.hidden = true;
+    layoutAll(true);
+    render();
+  }
+
+  // ─── Wire ───
+  court.addEventListener("pointerdown", onPointerDown);
+  refs.drawBtn.addEventListener("click", drawOne);
+  refs.bestBtn.addEventListener("click", showBest);
+  refs.chaosBtn.addEventListener("click", chaosSplit);
+  refs.simBtn.addEventListener("click", () => simulate(1000));
+  refs.resetBtn.addEventListener("click", reset);
+
+  const onResize = () => layoutAll(false);
+  window.addEventListener("resize", onResize);
+
+  // Initial paint. The scene is already in the DOM, so containers measure
+  // synchronously — lay out now (rAF can be throttled in background tabs),
+  // then refine on the next frame in case late layout shifts the boxes.
+  layoutAll(false);
   render();
-  return () => {};
+  requestAnimationFrame(() => layoutAll(false));
+
+  return () => { window.removeEventListener("resize", onResize); };
 }
