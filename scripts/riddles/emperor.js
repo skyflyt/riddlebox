@@ -119,20 +119,29 @@ export function mount(root, { fx }) {
     trayRow
   ]);
 
-  const verdict = el("div", { class: "verdict", text: "Drag marbles into both jars — or hold over a jar to pour. Then let the emperor draw." });
-  court.append(figure, jars, tray, verdict);
+  const stage = el("div", { class: "court-stage" }, [figure, jars]);
+  const verdict = el("div", { class: "verdict", text: "Drag marbles into both jars — or hold a jar to pour. Then let the emperor draw." });
+  court.append(stage, tray, verdict);
+
+  // ─── Full-width "how to play" strip (custom layout — avoids the
+  //     shared .story-steps grid, which mis-wraps mixed strong+text). ───
+  function hintCard(num, title, body) {
+    return el("li", { class: "play-hint" }, [
+      el("span", { class: "hint-num", "aria-hidden": "true", text: num }),
+      el("div", { class: "hint-body" }, [
+        el("strong", { class: "hint-title", text: title }),
+        el("span", { class: "hint-text", text: body })
+      ])
+    ]);
+  }
+  const hints = el("ol", { class: "play-hints" }, [
+    hintCard("1", "Drag or pour", "Pull marbles from either pile into either jar, or hold a jar to pour a stream."),
+    hintCard("2", "Choose the colour", "Tap the White or Black pile to pour just that colour — or leave both lit for a mix."),
+    hintCard("3", "Then he draws", "Place all 100 with neither jar empty. The emperor picks a jar and pulls one marble.")
+  ]);
 
   // ─── RIGHT: controls ───
   const controls = el("div", {});
-
-  const story = el("section", { class: "panel" }, [
-    el("h2", { class: "panel-title", text: "How to play" }),
-    el("ol", { class: "story-steps" }, [
-      el("li", { html: "<strong>Drag marbles</strong> from either pile into a jar. Drag between jars to rebalance. Both jars take any colour." }),
-      el("li", { html: "<strong>Hold over a jar to pour</strong> a stream. <strong>Tap the White or Black pile</strong> to pour just that colour — or leave both lit to pour a mix. <strong>Tap a marble in a jar</strong> to drop it back." }),
-      el("li", { html: "<strong>Place all 100</strong> with neither jar empty, then the emperor picks a jar and pulls one marble. White means freedom." })
-    ])
-  ]);
 
   const oddsPanel = el("section", { class: "panel" }, [
     el("div", { class: "panel-row" }, [
@@ -175,9 +184,9 @@ export function mount(root, { fx }) {
     el("p", { class: "card-blurb", text: "You can't beat that. Any other split either dilutes the lone-white jar or thickens the other one with black." })
   ]);
 
-  controls.append(story, oddsPanel, actions, historyPanel);
+  controls.append(oddsPanel, actions, historyPanel);
   grid.append(court, controls);
-  root.append(head, grid, solution);
+  root.append(head, hints, grid, solution);
 
   // ─── Refs ───
   // The hand is two colour piles; jar contents are single layers.
@@ -697,7 +706,7 @@ export function mount(root, { fx }) {
     armed.white = true; armed.black = true; pourTurn = 0;
     stats.draws = 0; stats.wins = 0; stats.history = []; stats.crowned = false;
     refs.verdict.className = "verdict";
-    refs.verdict.textContent = "Drag marbles into both jars — or hold over a jar to pour. Then let the emperor draw.";
+    refs.verdict.textContent = "Drag marbles into both jars — or hold a jar to pour. Then let the emperor draw.";
     refs.solution.hidden = true;
     layoutAll(true);
     render();
