@@ -19,6 +19,8 @@ no analytics. Open one in a browser and play.
 | **Three Switches, Three Bulbs** | Logic | Three switches in one room, three bulbs in the next. One trip through the door. Identify them all. |
 | **The Monty Hall Show** | Probability | Pick a door. The host opens a goat. Stay or switch — and watch the running tally pull away from 50/50. |
 | **Wolf, Goat & Cabbage** | Constraint | One boat. The farmer plus one passenger. Nobody eats anybody. Ferry them across. |
+| **Bridge & Torch** | Logic | Four people, one flashlight, seventeen minutes. Don't waste the slowest pair. |
+| **The 12-Ball Problem** | Deduction | Twelve identical balls, one is odd. Find it — and say whether it's heavy or light — in three weighings. |
 
 ## Running locally
 

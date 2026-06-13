@@ -90,6 +90,96 @@ const CARD_ART = {
         </g>
       </g>
     </svg>`,
+  bridge: `
+    <svg viewBox="0 0 320 168" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <radialGradient id="bridgeMoon" cx="50%" cy="50%">
+          <stop offset="0%" stop-color="#fefce8"/>
+          <stop offset="60%" stop-color="#fde68a"/>
+          <stop offset="100%" stop-color="#92400e" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <circle cx="260" cy="38" r="20" fill="url(#bridgeMoon)"/>
+      <!-- stars -->
+      <circle cx="40" cy="24" r="1.2" fill="#ffffff" opacity="0.7"/>
+      <circle cx="90" cy="40" r="1" fill="#ffffff" opacity="0.5"/>
+      <circle cx="150" cy="20" r="1.5" fill="#ffffff" opacity="0.6"/>
+      <circle cx="200" cy="48" r="1" fill="#ffffff" opacity="0.45"/>
+      <circle cx="120" cy="58" r="1" fill="#ffffff" opacity="0.55"/>
+      <!-- bridge -->
+      <line x1="20" y1="118" x2="300" y2="118" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+      <line x1="20" y1="138" x2="300" y2="138" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+      <rect x="20" y="120" width="280" height="14" rx="2" fill="#78350f"/>
+      <rect x="20" y="120" width="280" height="14" rx="2" fill="url(#bridgePlanks)" opacity="0.6"/>
+      <defs>
+        <pattern id="bridgePlanks" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse">
+          <rect width="14" height="14" fill="#a16207"/>
+          <line x1="14" y1="0" x2="14" y2="14" stroke="#451a03" stroke-width="1"/>
+        </pattern>
+      </defs>
+      <!-- people on near side -->
+      <g transform="translate(48 92)">
+        <circle r="10" fill="#86efac"/>
+        <text y="4" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="11" fill="#1a1a2e">1</text>
+      </g>
+      <g transform="translate(78 92)">
+        <circle r="10" fill="#34d399"/>
+        <text y="4" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="11" fill="#1a1a2e">2</text>
+      </g>
+      <!-- torch on bridge -->
+      <g transform="translate(180 110)">
+        <circle r="9" fill="#fde68a" opacity="0.6"/>
+        <circle r="5" fill="#fef08a"/>
+      </g>
+      <!-- people on far side -->
+      <g transform="translate(230 92)">
+        <circle r="10" fill="#fde68a"/>
+        <text y="4" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="11" fill="#1a1a2e">5</text>
+      </g>
+      <g transform="translate(262 92)">
+        <circle r="10" fill="#fca5a5"/>
+        <text y="4" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="11" fill="#1a1a2e">10</text>
+      </g>
+    </svg>`,
+  balls: `
+    <svg viewBox="0 0 320 168" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <radialGradient id="ballGrad" cx="32%" cy="28%">
+          <stop offset="0%" stop-color="#f1f5f9"/>
+          <stop offset="60%" stop-color="#94a3b8"/>
+          <stop offset="100%" stop-color="#334155"/>
+        </radialGradient>
+      </defs>
+      <!-- post and base -->
+      <rect x="156" y="44" width="8" height="80" rx="2" fill="#94a3b8"/>
+      <rect x="120" y="120" width="80" height="8" rx="2" fill="#94a3b8"/>
+      <!-- beam tilted -->
+      <g transform="translate(160 56) rotate(-7)">
+        <rect x="-90" y="-3" width="180" height="6" rx="3" fill="#cbd5e1"/>
+        <line x1="-72" y1="3" x2="-72" y2="22" stroke="#cbd5e1" stroke-width="1"/>
+        <line x1="72" y1="3" x2="72" y2="22" stroke="#cbd5e1" stroke-width="1"/>
+      </g>
+      <!-- left pan (down) -->
+      <g transform="translate(72 100)">
+        <path d="M-32 0 Q-28 18 0 18 Q28 18 32 0 Z" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1.4"/>
+        <circle cx="-12" cy="6" r="6" fill="url(#ballGrad)"/>
+        <circle cx="2" cy="8" r="6" fill="url(#ballGrad)"/>
+        <circle cx="16" cy="6" r="6" fill="url(#ballGrad)"/>
+      </g>
+      <!-- right pan (up) -->
+      <g transform="translate(248 76)">
+        <path d="M-32 0 Q-28 18 0 18 Q28 18 32 0 Z" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1.4"/>
+        <circle cx="-12" cy="6" r="6" fill="url(#ballGrad)"/>
+        <circle cx="2" cy="8" r="6" fill="url(#ballGrad)"/>
+        <circle cx="16" cy="6" r="6" fill="url(#ballGrad)"/>
+      </g>
+      <!-- 3 extra balls in tray -->
+      <g transform="translate(160 152)">
+        <circle cx="-14" r="6" fill="url(#ballGrad)"/>
+        <circle r="6" fill="url(#ballGrad)"/>
+        <circle cx="14" r="6" fill="url(#ballGrad)"/>
+      </g>
+    </svg>`,
   crossing: `
     <svg viewBox="0 0 320 168" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
       <defs>

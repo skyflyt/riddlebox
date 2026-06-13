@@ -5,6 +5,8 @@ import * as emperor from "./riddles/emperor.js";
 import * as bulbs from "./riddles/bulbs.js";
 import * as monty from "./riddles/monty.js";
 import * as crossing from "./riddles/crossing.js";
+import * as bridge from "./riddles/bridge.js";
+import * as balls from "./riddles/balls.js";
 
 const RIDDLES = [
   {
@@ -42,6 +44,24 @@ const RIDDLES = [
     blurb: "One boat. Two free seats. Nobody eats anybody. Ferry them across.",
     module: crossing,
     theme: "crossing"
+  },
+  {
+    id: "bridge",
+    title: "Bridge & Torch",
+    category: "Logic",
+    difficulty: 3,
+    blurb: "Four people. One flashlight. Seventeen minutes. Don't waste the slowest pair.",
+    module: bridge,
+    theme: "bridge"
+  },
+  {
+    id: "balls",
+    title: "The 12-Ball Problem",
+    category: "Deduction",
+    difficulty: 4,
+    blurb: "One of twelve is heavier or lighter. Find it in three weighings on a balance.",
+    module: balls,
+    theme: "balls"
   }
 ];
 
