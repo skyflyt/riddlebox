@@ -1,0 +1,6 @@
+body[data-theme="eight-puzzle"] {
+  --play-accent: #93c5fd;
+  --play-glow: rgba(147, 197, 253, 0.18);
+  --play-bg1: #102033;
+  --play-bg2: #070e17;
+}

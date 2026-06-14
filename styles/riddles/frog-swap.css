@@ -1,0 +1,6 @@
+body[data-theme="frog-swap"] {
+  --play-accent: #86efac;
+  --play-glow: rgba(196, 181, 253, 0.18);
+  --play-bg1: #162417;
+  --play-bg2: #080f09;
+}

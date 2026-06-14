@@ -7,16 +7,16 @@ import * as monty from "./riddles/monty.js";
 import * as crossing from "./riddles/crossing.js";
 import * as bridge from "./riddles/bridge.js";
 import * as balls from "./riddles/balls.js";
-import * as echo from "./riddles/echo.js";
-import * as keys from "./riddles/keys.js";
-import * as map from "./riddles/map.js";
-import * as egg from "./riddles/egg.js";
-import * as footsteps from "./riddles/footsteps.js";
-import * as towel from "./riddles/towel.js";
-import * as coin from "./riddles/coin.js";
-import * as letterM from "./riddles/letter-m.js";
-import * as windowRiddle from "./riddles/window.js";
-import * as comb from "./riddles/comb.js";
+import * as waterJugs from "./riddles/water-jugs.js";
+import * as hanoi from "./riddles/hanoi.js";
+import * as lightsOut from "./riddles/lights-out.js";
+import * as eightPuzzle from "./riddles/eight-puzzle.js";
+import * as nim from "./riddles/nim.js";
+import * as riverTrio from "./riddles/river-trio.js";
+import * as frogSwap from "./riddles/frog-swap.js";
+import * as magicSquare from "./riddles/magic-square.js";
+import * as fourQueens from "./riddles/four-queens.js";
+import * as mastermind from "./riddles/mastermind.js";
 
 const RIDDLES = [
   {
@@ -74,94 +74,94 @@ const RIDDLES = [
     theme: "balls"
   },
   {
-    id: "echo",
-    title: "The Talking Room",
-    category: "Classic",
-    difficulty: 1,
-    blurb: "No mouth, no body, but it repeats what you say when sound comes back.",
-    module: echo,
-    theme: "echo"
-  },
-  {
-    id: "keys",
-    title: "Keys Without Locks",
-    category: "Classic",
-    difficulty: 1,
-    blurb: "Many keys, zero doors. Name the object before it starts playing.",
-    module: keys,
-    theme: "keys"
-  },
-  {
-    id: "map",
-    title: "Cities Without Houses",
-    category: "Classic",
-    difficulty: 1,
-    blurb: "Cities, forests, and rivers are all present, but none of them are real.",
-    module: map,
-    theme: "map"
-  },
-  {
-    id: "egg",
-    title: "Break It First",
-    category: "Classic",
-    difficulty: 1,
-    blurb: "Sometimes the first useful move is the one that sounds destructive.",
-    module: egg,
-    theme: "egg"
-  },
-  {
-    id: "footsteps",
-    title: "What You Leave Behind",
-    category: "Classic",
+    id: "water-jugs",
+    title: "The 3L / 5L Water Jugs",
+    category: "Measurement",
     difficulty: 2,
-    blurb: "The more you take, the more evidence trails along behind you.",
-    module: footsteps,
-    theme: "footsteps"
+    blurb: "Fill, empty, and pour between two unmarked jugs until exactly four liters appear.",
+    module: waterJugs,
+    theme: "water-jugs"
   },
   {
-    id: "towel",
-    title: "The Damp Helper",
-    category: "Classic",
-    difficulty: 1,
-    blurb: "It gets wetter every time it does its job correctly.",
-    module: towel,
-    theme: "towel"
-  },
-  {
-    id: "coin",
-    title: "Head, Tail, No Body",
-    category: "Classic",
-    difficulty: 1,
-    blurb: "Two named sides, no anatomy, and a habit of deciding things.",
-    module: coin,
-    theme: "coin"
-  },
-  {
-    id: "letter-m",
-    title: "Minute, Moment, Millennium",
-    category: "Wordplay",
+    id: "hanoi",
+    title: "Towers of Hanoi",
+    category: "Sequencing",
     difficulty: 2,
-    blurb: "Once in a minute, twice in a moment, and never in a thousand years.",
-    module: letterM,
-    theme: "letter-m"
+    blurb: "Move the stack across three pegs without ever placing a large disk on a small one.",
+    module: hanoi,
+    theme: "hanoi"
   },
   {
-    id: "window",
-    title: "Through the Wall",
-    category: "Classic",
-    difficulty: 1,
-    blurb: "The invention sounds like x-ray vision until you notice the glass.",
-    module: windowRiddle,
-    theme: "window"
+    id: "lights-out",
+    title: "Lights Out",
+    category: "Toggle",
+    difficulty: 3,
+    blurb: "Every press flips a plus-shaped cluster. Turn the board completely dark.",
+    module: lightsOut,
+    theme: "lights-out"
   },
   {
-    id: "comb",
-    title: "Teeth That Cannot Bite",
-    category: "Classic",
-    difficulty: 1,
-    blurb: "Many teeth in a row, but not a single one is dangerous.",
-    module: comb,
-    theme: "comb"
+    id: "eight-puzzle",
+    title: "The 8-Puzzle",
+    category: "Sliding",
+    difficulty: 2,
+    blurb: "Slide numbered tiles through the blank space until the grid is in order.",
+    module: eightPuzzle,
+    theme: "eight-puzzle"
+  },
+  {
+    id: "nim",
+    title: "21 Sticks",
+    category: "Strategy",
+    difficulty: 2,
+    blurb: "Take 1, 2, or 3 sticks. Whoever takes the last one wins.",
+    module: nim,
+    theme: "nim"
+  },
+  {
+    id: "river-trio",
+    title: "Guides & Monsters",
+    category: "Constraint",
+    difficulty: 4,
+    blurb: "Move three guides and three monsters across without ever letting monsters outnumber guides.",
+    module: riverTrio,
+    theme: "river-trio"
+  },
+  {
+    id: "frog-swap",
+    title: "Frog Swap",
+    category: "Sequencing",
+    difficulty: 3,
+    blurb: "Slide and jump two frog teams until they trade sides.",
+    module: frogSwap,
+    theme: "frog-swap"
+  },
+  {
+    id: "magic-square",
+    title: "The 15 Magic Square",
+    category: "Number",
+    difficulty: 3,
+    blurb: "Place 1 through 9 so every row, column, and diagonal totals fifteen.",
+    module: magicSquare,
+    theme: "magic-square"
+  },
+  {
+    id: "four-queens",
+    title: "Four Queens",
+    category: "Spatial",
+    difficulty: 3,
+    blurb: "Place four queens on a 4x4 board so none can attack another.",
+    module: fourQueens,
+    theme: "four-queens"
+  },
+  {
+    id: "mastermind",
+    title: "Mini Mastermind",
+    category: "Deduction",
+    difficulty: 3,
+    blurb: "Guess a hidden three-color code from exact-hit and near-miss clues.",
+    module: mastermind,
+    theme: "mastermind"
   }
 ];
 

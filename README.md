@@ -21,16 +21,16 @@ no analytics. Open one in a browser and play.
 | **Wolf, Goat & Cabbage** | Constraint | One boat. The farmer plus one passenger. Nobody eats anybody. Ferry them across. |
 | **Bridge & Torch** | Logic | Four people, one flashlight, seventeen minutes. Don't waste the slowest pair. |
 | **The 12-Ball Problem** | Deduction | Twelve identical balls, one is odd. Find it — and say whether it's heavy or light — in three weighings. |
-| **The Talking Room** | Classic | No mouth, no body, but it repeats what you say when sound comes back. |
-| **Keys Without Locks** | Classic | Many keys, zero doors. The classic answer is a piano. |
-| **Cities Without Houses** | Classic | Cities, forests, and rivers are all present, but none of them are physically there. |
-| **Break It First** | Classic | The useful part starts after the shell cracks. |
-| **What You Leave Behind** | Classic | The more you take, the more evidence trails along behind you. |
-| **The Damp Helper** | Classic | It gets wetter every time it dries something else. |
-| **Head, Tail, No Body** | Classic | Two named sides, no anatomy, and a habit of deciding things. |
-| **Minute, Moment, Millennium** | Wordplay | Once in a minute, twice in a moment, and never in a thousand years. |
-| **Through the Wall** | Classic | The invention sounds like x-ray vision until you notice the glass. |
-| **Teeth That Cannot Bite** | Classic | Many teeth in a row, but not a single one is dangerous. |
+| **The 3L / 5L Water Jugs** | Measurement | Fill, empty, and pour between two unmarked jugs until exactly four liters appear. |
+| **Towers of Hanoi** | Sequencing | Move the stack across three pegs without ever placing a large disk on a small one. |
+| **Lights Out** | Toggle | Every press flips a plus-shaped cluster. Turn the board completely dark. |
+| **The 8-Puzzle** | Sliding | Slide numbered tiles through the blank space until the grid is in order. |
+| **21 Sticks** | Strategy | Take 1, 2, or 3 sticks. Whoever takes the last one wins. |
+| **Guides & Monsters** | Constraint | Move three guides and three monsters across without ever letting monsters outnumber guides. |
+| **Frog Swap** | Sequencing | Slide and jump two frog teams until they trade sides. |
+| **The 15 Magic Square** | Number | Place 1 through 9 so every row, column, and diagonal totals fifteen. |
+| **Four Queens** | Spatial | Place four queens on a 4x4 board so none can attack another. |
+| **Mini Mastermind** | Deduction | Guess a hidden three-color code from exact-hit and near-miss clues. |
 
 ## Running locally
 

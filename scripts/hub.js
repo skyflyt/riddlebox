@@ -219,21 +219,21 @@ const CARD_ART = {
     </svg>`
 };
 
-const CLASSIC_CARD_ART = {
-  echo: { bg: "#0f172a", accent: "#7dd3fc", accent2: "#a78bfa", glyph: ")))" },
-  keys: { bg: "#111827", accent: "#f8fafc", accent2: "#f4c35b", glyph: "♪" },
-  map: { bg: "#10251e", accent: "#86efac", accent2: "#38bdf8", glyph: "⌖" },
-  egg: { bg: "#24170d", accent: "#fef3c7", accent2: "#fb7185", glyph: "◯" },
-  footsteps: { bg: "#17122a", accent: "#c4b5fd", accent2: "#f4c35b", glyph: "••" },
-  towel: { bg: "#0c1b2e", accent: "#67e8f9", accent2: "#60a5fa", glyph: "≈" },
-  coin: { bg: "#241909", accent: "#fde68a", accent2: "#34d399", glyph: "$" },
-  "letter-m": { bg: "#25152f", accent: "#f0abfc", accent2: "#93c5fd", glyph: "M" },
-  window: { bg: "#102033", accent: "#93c5fd", accent2: "#f4c35b", glyph: "▦" },
-  comb: { bg: "#271214", accent: "#fca5a5", accent2: "#c4b5fd", glyph: "≡" }
+const PLAYABLE_CARD_ART = {
+  "water-jugs": { bg: "#0c1b2e", accent: "#67e8f9", accent2: "#60a5fa", glyph: "4L" },
+  hanoi: { bg: "#17122a", accent: "#c4b5fd", accent2: "#f4c35b", glyph: "3" },
+  "lights-out": { bg: "#1f1d12", accent: "#fef08a", accent2: "#60a5fa", glyph: "X" },
+  "eight-puzzle": { bg: "#102033", accent: "#93c5fd", accent2: "#f4c35b", glyph: "8" },
+  nim: { bg: "#241909", accent: "#fde68a", accent2: "#f87171", glyph: "21" },
+  "river-trio": { bg: "#10251e", accent: "#86efac", accent2: "#38bdf8", glyph: "G/M" },
+  "frog-swap": { bg: "#162417", accent: "#86efac", accent2: "#c4b5fd", glyph: "><" },
+  "magic-square": { bg: "#25152f", accent: "#f0abfc", accent2: "#93c5fd", glyph: "15" },
+  "four-queens": { bg: "#161820", accent: "#fde68a", accent2: "#f8fafc", glyph: "Q" },
+  mastermind: { bg: "#101827", accent: "#60a5fa", accent2: "#f87171", glyph: "ooo" }
 };
 
-function classicCardArt(theme) {
-  const art = CLASSIC_CARD_ART[theme];
+function playableCardArt(theme) {
+  const art = PLAYABLE_CARD_ART[theme];
   if (!art) return "";
   return `
     <svg viewBox="0 0 320 168" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
@@ -259,7 +259,7 @@ function difficultyDots(level) {
 
 function buildCard(riddle, onSelect) {
   const card = el("button", { class: "riddle-card", type: "button", "aria-label": `Play ${riddle.title}`, onclick: () => onSelect(riddle.id) }, [
-    el("div", { class: `card-art ${riddle.theme}`, html: CARD_ART[riddle.theme] || classicCardArt(riddle.theme) }),
+    el("div", { class: `card-art ${riddle.theme}`, html: CARD_ART[riddle.theme] || playableCardArt(riddle.theme) }),
     el("div", { class: "card-body" }, [
       el("div", { class: "card-meta" }, [
         el("span", { class: "card-category", text: riddle.category }),

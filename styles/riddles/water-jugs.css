@@ -1,0 +1,6 @@
+body[data-theme="water-jugs"] {
+  --play-accent: #67e8f9;
+  --play-glow: rgba(103, 232, 249, 0.18);
+  --play-bg1: #0c1b2e;
+  --play-bg2: #06101d;
+}

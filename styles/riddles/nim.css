@@ -1,0 +1,6 @@
+body[data-theme="nim"] {
+  --play-accent: #f4c35b;
+  --play-glow: rgba(244, 195, 91, 0.18);
+  --play-bg1: #241909;
+  --play-bg2: #100a03;
+}

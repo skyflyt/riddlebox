@@ -1,0 +1,6 @@
+body[data-theme="lights-out"] {
+  --play-accent: #fef08a;
+  --play-glow: rgba(254, 240, 138, 0.18);
+  --play-bg1: #1f1d12;
+  --play-bg2: #0d0c06;
+}

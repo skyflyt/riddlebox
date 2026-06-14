@@ -1,0 +1,6 @@
+body[data-theme="magic-square"] {
+  --play-accent: #f0abfc;
+  --play-glow: rgba(240, 171, 252, 0.18);
+  --play-bg1: #25152f;
+  --play-bg2: #0e0712;
+}

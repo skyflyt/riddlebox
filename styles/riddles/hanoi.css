@@ -1,0 +1,6 @@
+body[data-theme="hanoi"] {
+  --play-accent: #c4b5fd;
+  --play-glow: rgba(196, 181, 253, 0.18);
+  --play-bg1: #17122a;
+  --play-bg2: #080611;
+}

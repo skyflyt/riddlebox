@@ -1,0 +1,6 @@
+body[data-theme="four-queens"] {
+  --play-accent: #fde68a;
+  --play-glow: rgba(253, 230, 138, 0.16);
+  --play-bg1: #161820;
+  --play-bg2: #08090e;
+}

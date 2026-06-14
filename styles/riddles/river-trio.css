@@ -1,0 +1,6 @@
+body[data-theme="river-trio"] {
+  --play-accent: #86efac;
+  --play-glow: rgba(96, 165, 250, 0.16);
+  --play-bg1: #10251e;
+  --play-bg2: #07130f;
+}
