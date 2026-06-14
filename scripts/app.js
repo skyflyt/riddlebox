@@ -7,6 +7,16 @@ import * as monty from "./riddles/monty.js";
 import * as crossing from "./riddles/crossing.js";
 import * as bridge from "./riddles/bridge.js";
 import * as balls from "./riddles/balls.js";
+import * as echo from "./riddles/echo.js";
+import * as keys from "./riddles/keys.js";
+import * as map from "./riddles/map.js";
+import * as egg from "./riddles/egg.js";
+import * as footsteps from "./riddles/footsteps.js";
+import * as towel from "./riddles/towel.js";
+import * as coin from "./riddles/coin.js";
+import * as letterM from "./riddles/letter-m.js";
+import * as windowRiddle from "./riddles/window.js";
+import * as comb from "./riddles/comb.js";
 
 const RIDDLES = [
   {
@@ -62,6 +72,96 @@ const RIDDLES = [
     blurb: "One of twelve is heavier or lighter. Find it in three weighings on a balance.",
     module: balls,
     theme: "balls"
+  },
+  {
+    id: "echo",
+    title: "The Talking Room",
+    category: "Classic",
+    difficulty: 1,
+    blurb: "No mouth, no body, but it repeats what you say when sound comes back.",
+    module: echo,
+    theme: "echo"
+  },
+  {
+    id: "keys",
+    title: "Keys Without Locks",
+    category: "Classic",
+    difficulty: 1,
+    blurb: "Many keys, zero doors. Name the object before it starts playing.",
+    module: keys,
+    theme: "keys"
+  },
+  {
+    id: "map",
+    title: "Cities Without Houses",
+    category: "Classic",
+    difficulty: 1,
+    blurb: "Cities, forests, and rivers are all present, but none of them are real.",
+    module: map,
+    theme: "map"
+  },
+  {
+    id: "egg",
+    title: "Break It First",
+    category: "Classic",
+    difficulty: 1,
+    blurb: "Sometimes the first useful move is the one that sounds destructive.",
+    module: egg,
+    theme: "egg"
+  },
+  {
+    id: "footsteps",
+    title: "What You Leave Behind",
+    category: "Classic",
+    difficulty: 2,
+    blurb: "The more you take, the more evidence trails along behind you.",
+    module: footsteps,
+    theme: "footsteps"
+  },
+  {
+    id: "towel",
+    title: "The Damp Helper",
+    category: "Classic",
+    difficulty: 1,
+    blurb: "It gets wetter every time it does its job correctly.",
+    module: towel,
+    theme: "towel"
+  },
+  {
+    id: "coin",
+    title: "Head, Tail, No Body",
+    category: "Classic",
+    difficulty: 1,
+    blurb: "Two named sides, no anatomy, and a habit of deciding things.",
+    module: coin,
+    theme: "coin"
+  },
+  {
+    id: "letter-m",
+    title: "Minute, Moment, Millennium",
+    category: "Wordplay",
+    difficulty: 2,
+    blurb: "Once in a minute, twice in a moment, and never in a thousand years.",
+    module: letterM,
+    theme: "letter-m"
+  },
+  {
+    id: "window",
+    title: "Through the Wall",
+    category: "Classic",
+    difficulty: 1,
+    blurb: "The invention sounds like x-ray vision until you notice the glass.",
+    module: windowRiddle,
+    theme: "window"
+  },
+  {
+    id: "comb",
+    title: "Teeth That Cannot Bite",
+    category: "Classic",
+    difficulty: 1,
+    blurb: "Many teeth in a row, but not a single one is dangerous.",
+    module: comb,
+    theme: "comb"
   }
 ];
 
@@ -79,11 +179,11 @@ function setView(id) {
 
   if (!id || !RIDDLE_INDEX.has(id)) {
     document.body.dataset.view = "hub";
-    document.body.dataset.theme = "";
+    delete document.body.dataset.theme;
     document.title = "Riddlebox — classic puzzles, made playable";
     backBtn.hidden = true;
     renderHub(view, RIDDLES, (rid) => navigate(rid));
-    window.scrollTo({ top: 0, behavior: "instant" });
+    window.scrollTo({ top: 0, behavior: "auto" });
     return;
   }
 
@@ -96,7 +196,7 @@ function setView(id) {
   const scene = el("section", { class: "scene" });
   view.appendChild(scene);
   activeTeardown = riddle.module.mount(scene, { fx, riddle });
-  window.scrollTo({ top: 0, behavior: "instant" });
+  window.scrollTo({ top: 0, behavior: "auto" });
 }
 
 function navigate(id) {

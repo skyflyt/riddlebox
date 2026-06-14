@@ -1,0 +1,14 @@
+body[data-theme="egg"] {
+  --classic-accent: #fef3c7;
+  --classic-glow: rgba(254, 243, 199, 0.18);
+  --classic-shadow: rgba(244, 195, 91, 0.24);
+  --classic-symbol: #4a1d08;
+  --classic-orb-bg: radial-gradient(circle at 42% 30%, #fff7ed, #fef3c7 48%, #f97316 100%);
+  --classic-stage-bg:
+    radial-gradient(560px 340px at 82% 6%, rgba(251, 146, 60, 0.18), transparent 70%),
+    linear-gradient(180deg, #24170d 0%, #100904 100%);
+  background:
+    radial-gradient(840px 620px at 70% 0%, rgba(254, 243, 199, 0.09), transparent 72%),
+    radial-gradient(640px 480px at 0% 80%, rgba(251, 113, 133, 0.06), transparent 70%),
+    var(--bg);
+}

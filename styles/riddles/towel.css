@@ -1,0 +1,15 @@
+body[data-theme="towel"] {
+  --classic-accent: #67e8f9;
+  --classic-glow: rgba(103, 232, 249, 0.2);
+  --classic-shadow: rgba(96, 165, 250, 0.24);
+  --classic-symbol: #082f49;
+  --classic-orb-bg: radial-gradient(circle at 36% 30%, #ecfeff, #67e8f9 44%, #1d4ed8 100%);
+  --classic-stage-bg:
+    linear-gradient(180deg, rgba(255,255,255,0.04) 0 2px, transparent 2px 18px),
+    radial-gradient(620px 380px at 86% 8%, rgba(103, 232, 249, 0.16), transparent 70%),
+    linear-gradient(180deg, #0c1b2e 0%, #06101d 100%);
+  background:
+    radial-gradient(820px 620px at 72% 0%, rgba(103, 232, 249, 0.09), transparent 70%),
+    radial-gradient(700px 520px at 0% 90%, rgba(167, 243, 208, 0.06), transparent 70%),
+    var(--bg);
+}

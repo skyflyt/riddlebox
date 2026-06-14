@@ -139,7 +139,7 @@ body[data-theme="emperor"] {
   text-align: center;
   font-size: 1.16rem;
   font-weight: 500;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
   color: var(--text);
   line-height: 1.4;
 }
@@ -192,7 +192,7 @@ body[data-theme="emperor"] {
   color: var(--muted);
   font-size: 0.78rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
@@ -243,7 +243,7 @@ body[data-theme="emperor"] {
   top: 48%;
   text-align: center;
   font-size: 0.74rem;
-  letter-spacing: 0.06em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--dim);
   pointer-events: none;
@@ -285,7 +285,7 @@ body[data-theme="emperor"] {
   color: var(--muted);
   font-size: 0.78rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
@@ -353,7 +353,7 @@ body[data-theme="emperor"] {
 .chip-dot.white { background: radial-gradient(circle at 32% 26%, #fff, #fff5d6 38%, #d4c9b0 78%); border: 1px solid rgba(80, 65, 40, 0.5); }
 .chip-dot.black { background: radial-gradient(circle at 32% 24%, #6b6470, #1a1820 38%, #050507 80%); border: 1px solid rgba(255, 255, 255, 0.16); }
 
-.chip-label { letter-spacing: 0.01em; }
+.chip-label { letter-spacing: 0; }
 .chip-count {
   margin-left: auto;
   padding: 1px 8px;
@@ -442,7 +442,7 @@ body[data-theme="emperor"] {
 .odds-value {
   font-size: 2.4rem;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }

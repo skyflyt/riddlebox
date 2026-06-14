@@ -1,0 +1,14 @@
+body[data-theme="echo"] {
+  --classic-accent: #7dd3fc;
+  --classic-glow: rgba(125, 211, 252, 0.22);
+  --classic-shadow: rgba(125, 211, 252, 0.28);
+  --classic-symbol: #07111f;
+  --classic-orb-bg: radial-gradient(circle at 35% 30%, #f8fafc, #7dd3fc 42%, #312e81 100%);
+  --classic-stage-bg:
+    radial-gradient(640px 420px at 88% 8%, rgba(125, 211, 252, 0.18), transparent 68%),
+    linear-gradient(180deg, #101827 0%, #070a14 100%);
+  background:
+    radial-gradient(900px 680px at 65% 0%, rgba(125, 211, 252, 0.1), transparent 72%),
+    radial-gradient(700px 520px at 0% 100%, rgba(167, 139, 250, 0.08), transparent 70%),
+    var(--bg);
+}

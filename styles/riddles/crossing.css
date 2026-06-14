@@ -47,7 +47,7 @@ body[data-theme="crossing"] {
   color: var(--muted);
   font-size: 0.78rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
   text-transform: uppercase;
   width: max-content;
 }
@@ -191,7 +191,7 @@ body[data-theme="crossing"] {
   font-size: 0.78rem;
   color: var(--muted);
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
 }
 
 .creature.in-boat .crit-art svg { transform: scale(0.84); }

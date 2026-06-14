@@ -42,7 +42,7 @@ body[data-theme="bulbs"] {
   color: var(--muted);
   font-size: 0.82rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
   text-transform: uppercase;
   width: max-content;
 }
@@ -89,7 +89,7 @@ body[data-theme="bulbs"] {
   font-size: 0.92rem;
   font-weight: 600;
   color: var(--muted);
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
@@ -154,7 +154,7 @@ body[data-theme="bulbs"] {
   text-align: center;
   font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0;
   color: var(--dim);
   transition: color 200ms;
 }
@@ -255,7 +255,7 @@ body[data-theme="bulbs"] {
 .assign label {
   font-size: 0.74rem;
   color: var(--muted);
-  letter-spacing: 0.06em;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 

@@ -19,6 +19,7 @@ yarn-error.log*
 dist/
 build/
 .cache/
+.herenow/
 
 # === No secrets, ever. ===
 # This is a static frontend. It must not contain or reference secrets.

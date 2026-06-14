@@ -75,7 +75,7 @@ const CARD_ART = {
         </linearGradient>
       </defs>
       <rect width="320" height="168" fill="url(#curtainGrad)" opacity="0.55"/>
-      <g font-family="Inter, sans-serif" font-weight="700" font-size="32">
+      <g font-family="ui-sans-serif, system-ui, sans-serif" font-weight="700" font-size="32">
         <g transform="translate(50 30)">
           <rect width="60" height="110" rx="4" fill="#1c1917" stroke="#f4c35b" stroke-width="2"/>
           <text x="30" y="68" text-anchor="middle" fill="#f4c35b">1</text>
@@ -120,11 +120,11 @@ const CARD_ART = {
       <!-- people on near side -->
       <g transform="translate(48 92)">
         <circle r="10" fill="#86efac"/>
-        <text y="4" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="11" fill="#1a1a2e">1</text>
+        <text y="4" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif" font-weight="700" font-size="11" fill="#1a1a2e">1</text>
       </g>
       <g transform="translate(78 92)">
         <circle r="10" fill="#34d399"/>
-        <text y="4" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="11" fill="#1a1a2e">2</text>
+        <text y="4" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif" font-weight="700" font-size="11" fill="#1a1a2e">2</text>
       </g>
       <!-- torch on bridge -->
       <g transform="translate(180 110)">
@@ -134,11 +134,11 @@ const CARD_ART = {
       <!-- people on far side -->
       <g transform="translate(230 92)">
         <circle r="10" fill="#fde68a"/>
-        <text y="4" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="11" fill="#1a1a2e">5</text>
+        <text y="4" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif" font-weight="700" font-size="11" fill="#1a1a2e">5</text>
       </g>
       <g transform="translate(262 92)">
         <circle r="10" fill="#fca5a5"/>
-        <text y="4" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="11" fill="#1a1a2e">10</text>
+        <text y="4" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif" font-weight="700" font-size="11" fill="#1a1a2e">10</text>
       </g>
     </svg>`,
   balls: `
@@ -219,6 +219,36 @@ const CARD_ART = {
     </svg>`
 };
 
+const CLASSIC_CARD_ART = {
+  echo: { bg: "#0f172a", accent: "#7dd3fc", accent2: "#a78bfa", glyph: ")))" },
+  keys: { bg: "#111827", accent: "#f8fafc", accent2: "#f4c35b", glyph: "♪" },
+  map: { bg: "#10251e", accent: "#86efac", accent2: "#38bdf8", glyph: "⌖" },
+  egg: { bg: "#24170d", accent: "#fef3c7", accent2: "#fb7185", glyph: "◯" },
+  footsteps: { bg: "#17122a", accent: "#c4b5fd", accent2: "#f4c35b", glyph: "••" },
+  towel: { bg: "#0c1b2e", accent: "#67e8f9", accent2: "#60a5fa", glyph: "≈" },
+  coin: { bg: "#241909", accent: "#fde68a", accent2: "#34d399", glyph: "$" },
+  "letter-m": { bg: "#25152f", accent: "#f0abfc", accent2: "#93c5fd", glyph: "M" },
+  window: { bg: "#102033", accent: "#93c5fd", accent2: "#f4c35b", glyph: "▦" },
+  comb: { bg: "#271214", accent: "#fca5a5", accent2: "#c4b5fd", glyph: "≡" }
+};
+
+function classicCardArt(theme) {
+  const art = CLASSIC_CARD_ART[theme];
+  if (!art) return "";
+  return `
+    <svg viewBox="0 0 320 168" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <rect width="320" height="168" fill="${art.bg}"/>
+      <circle cx="250" cy="38" r="72" fill="${art.accent}" opacity="0.12"/>
+      <circle cx="72" cy="138" r="90" fill="${art.accent2}" opacity="0.1"/>
+      <path d="M24 124 C72 92, 102 148, 150 108 S236 64, 296 94" stroke="${art.accent}" stroke-width="2" fill="none" opacity="0.45"/>
+      <path d="M34 42 H286" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <path d="M34 126 H286" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <circle cx="160" cy="84" r="52" fill="rgba(255,255,255,0.06)" stroke="${art.accent}" stroke-width="1.5"/>
+      <circle cx="160" cy="84" r="38" fill="${art.accent}" opacity="0.16"/>
+      <text x="160" y="99" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif" font-size="38" font-weight="800" fill="${art.accent}">${art.glyph}</text>
+    </svg>`;
+}
+
 function difficultyDots(level) {
   const dots = [];
   for (let i = 0; i < 5; i += 1) {
@@ -229,7 +259,7 @@ function difficultyDots(level) {
 
 function buildCard(riddle, onSelect) {
   const card = el("button", { class: "riddle-card", type: "button", "aria-label": `Play ${riddle.title}`, onclick: () => onSelect(riddle.id) }, [
-    el("div", { class: `card-art ${riddle.theme}`, html: CARD_ART[riddle.theme] || "" }),
+    el("div", { class: `card-art ${riddle.theme}`, html: CARD_ART[riddle.theme] || classicCardArt(riddle.theme) }),
     el("div", { class: "card-body" }, [
       el("div", { class: "card-meta" }, [
         el("span", { class: "card-category", text: riddle.category }),

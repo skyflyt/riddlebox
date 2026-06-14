@@ -1,0 +1,16 @@
+body[data-theme="window"] {
+  --classic-accent: #93c5fd;
+  --classic-glow: rgba(147, 197, 253, 0.2);
+  --classic-shadow: rgba(56, 189, 248, 0.22);
+  --classic-symbol: #082f49;
+  --classic-orb-bg: linear-gradient(135deg, #e0f2fe 0 48%, #93c5fd 48% 52%, #0369a1 52% 100%);
+  --classic-stage-bg:
+    linear-gradient(90deg, rgba(147,197,253,0.14) 0 1px, transparent 1px 50%),
+    linear-gradient(180deg, rgba(147,197,253,0.14) 0 1px, transparent 1px 50%),
+    radial-gradient(620px 420px at 84% 8%, rgba(147, 197, 253, 0.16), transparent 70%),
+    linear-gradient(180deg, #102033 0%, #070e17 100%);
+  background:
+    radial-gradient(840px 620px at 76% -8%, rgba(147, 197, 253, 0.09), transparent 70%),
+    radial-gradient(640px 500px at 0% 88%, rgba(244, 195, 91, 0.05), transparent 70%),
+    var(--bg);
+}

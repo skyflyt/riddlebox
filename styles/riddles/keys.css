@@ -1,0 +1,14 @@
+body[data-theme="keys"] {
+  --classic-accent: #f8fafc;
+  --classic-glow: rgba(244, 195, 91, 0.18);
+  --classic-shadow: rgba(248, 250, 252, 0.18);
+  --classic-symbol: #11141f;
+  --classic-orb-bg: linear-gradient(135deg, #f8fafc 0 48%, #111827 48% 100%);
+  --classic-stage-bg:
+    linear-gradient(90deg, rgba(248, 250, 252, 0.05) 0 12%, transparent 12% 24%),
+    linear-gradient(180deg, #15161f 0%, #07070d 100%);
+  background:
+    radial-gradient(800px 620px at 18% 0%, rgba(248, 250, 252, 0.08), transparent 70%),
+    radial-gradient(720px 520px at 88% 70%, rgba(244, 195, 91, 0.08), transparent 70%),
+    var(--bg);
+}
